@@ -266,7 +266,7 @@ d'entraînement est très proche de la limite physique de 20,34°.
 Avec Python ≥ 3.10 (résultats obtenus avec Python 3.14, sur CPU) :
 
 ```bash
-git clone git@github.com:H-HABCHANE/pendule-inverse-ppo-lqr.git
+git clone https://github.com/H-HABCHANE/contr-le-d-un-pendule-invers-par-PPO-avec-comparaison-LQR.git pendule-inverse-ppo-lqr
 cd pendule-inverse-ppo-lqr
 python -m venv .venv && source .venv/bin/activate
 pip install torch==2.14.1 --index-url https://download.pytorch.org/whl/cpu   # optionnel : PyTorch CPU, plus léger
