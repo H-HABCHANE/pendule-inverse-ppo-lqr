@@ -1,0 +1,82 @@
+physique:
+  M: 1.0
+  m: 0.1
+  l: 0.5
+  g: 9.81
+simulation:
+  dt: 0.02
+  integrateur: euler
+  u_max: 4.0
+lqr:
+  Q:
+  - 1.0
+  - 0.0
+  - 10.0
+  - 0.0
+  R: 0.1
+  R_balayage:
+  - 0.03
+  - 0.1
+  - 0.3
+  - 1.0
+  - 3.0
+  - 10.0
+environnement:
+  zone_entrainement_deg: 20.0
+  theta_arret_deg: 25.0
+  x_arret: 4.0
+  duree_episode_s: 5.0
+  x0: 0.05
+  x_point0: 0.05
+  theta_point0: 0.1
+  recompense:
+    survie: 1.0
+    poids_theta: 10.0
+    poids_x: 0.1
+    poids_u: 0.01
+    poids_theta_point: 0.5
+    penalite_arret: -50.0
+ppo:
+  total_timesteps: 1000000
+  seed: 0
+  learning_rate: 0.0003
+  n_steps: 2048
+  batch_size: 64
+  n_epochs: 10
+  gamma: 0.99
+  gae_lambda: 0.95
+  clip_range: 0.2
+  ent_coef: 0.01
+  vf_coef: 0.5
+evaluation:
+  angles_deg:
+  - 5.0
+  - 10.0
+  - 15.0
+  - 18.0
+  - 20.0
+  - 40.0
+  - -5.0
+  - -10.0
+  - -15.0
+  - -18.0
+  - -20.0
+  - -40.0
+  duree_s: 10.0
+  arret_aux_limites: true
+  theta_arret_deg: 90.0
+  x_arret: 4.0
+  seuil_stabilisation_deg: 0.5
+  maintien_min_s: 1.0
+  x_tol: 0.1
+  x_point_tol: 0.1
+  theta_point_tol_deg: 5.0
+bassin:
+  theta0_deg:
+    min: -25.0
+    max: 25.0
+    pas: 1.0
+  theta_point0:
+    min: -1.5
+    max: 1.5
+    pas: 0.1

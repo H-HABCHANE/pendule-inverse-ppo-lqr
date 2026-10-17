@@ -1,0 +1,9 @@
+vec_env,n_envs,pas_par_seconde,coeurs
+dummy,1,1173.3,8
+dummy,2,1446.5,8
+dummy,4,1663.8,8
+dummy,8,1796.7,8
+subproc,1,893.5,8
+subproc,2,1267.2,8
+subproc,4,1703.6,8
+subproc,8,1894.2,8
