@@ -1,0 +1,58 @@
+# Source unique des paramètres du projet.
+# Les valeurs reprennent la version « zone ±20° » du notebook d'origine
+# (archive/PIR-2.ipynb, cellules « CODE 1 » ±20° et « CODE 2 ») et les diapos.
+# Une copie de ce fichier est sauvegardée à côté de chaque modèle entraîné.
+
+physique:
+  M: 1.0          # masse du chariot [kg]
+  m: 0.1          # masse ponctuelle du pendule [kg]
+  l: 0.5          # longueur de la tige [m]
+  g: 9.81         # gravité [m/s²]
+
+simulation:
+  dt: 0.02            # période de commande [s] (50 Hz), force constante sur dt
+  integrateur: euler  # « euler » (explicite, comme le notebook) ou « rk4 »
+  u_max: 4.0          # saturation de l'actionneur |u| <= u_max [N]
+
+lqr:
+  # Coût J = ∫ (sᵀ Q s + R u²) dt, s = [x, ẋ, θ, θ̇] (diapos 9-10)
+  Q: [1.0, 0.0, 10.0, 0.0]
+  R: 0.1
+
+environnement:
+  zone_entrainement_deg: 20.0   # θ0 tiré uniformément dans ±zone
+  theta_arret_deg: 25.0         # fin d'épisode si |θ| dépasse cette valeur
+  x_arret: 4.0                  # fin d'épisode si |x| dépasse cette valeur [m]
+  duree_episode_s: 5.0          # 250 pas
+  # Bornes des autres composantes de l'état initial (tirage uniforme ±valeur)
+  x0: 0.05
+  x_point0: 0.05
+  theta_point0: 0.10
+  recompense:
+    survie: 1.0
+    poids_theta: 10.0
+    poids_x: 0.1
+    poids_u: 0.01
+    poids_theta_point: 0.5
+    penalite_arret: -50.0
+
+ppo:
+  total_timesteps: 1000000
+  seed: 0
+  learning_rate: 0.0003
+  n_steps: 2048
+  batch_size: 64
+  n_epochs: 10
+  gamma: 0.99
+  gae_lambda: 0.95
+  clip_range: 0.2
+  ent_coef: 0.01
+  vf_coef: 0.5
+
+evaluation:
+  angles_deg: [5.0, 15.0, 18.0, 20.0, 40.0]
+  duree_s: 6.0
+  # Le notebook (CODE 2) évaluait sans critère d'arrêt.
+  arret_aux_limites: false
+  # Méthode d'origine : premier instant où |θ| < seuil (voir metriques.py)
+  seuil_stabilisation_deg: 0.5
