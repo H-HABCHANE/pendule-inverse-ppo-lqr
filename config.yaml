@@ -18,6 +18,8 @@ lqr:
   # Coût J = ∫ (sᵀ Q s + R u²) dt, s = [x, ẋ, θ, θ̇] (diapos 9-10)
   Q: [1.0, 0.0, 10.0, 0.0]
   R: 0.1
+  # Autres valeurs de R testées avec le même Q (LQR saturé)
+  R_balayage: [0.03, 0.1, 0.3, 1.0, 3.0, 10.0]
 
 environnement:
   zone_entrainement_deg: 20.0   # θ0 tiré uniformément dans ±zone
@@ -50,9 +52,25 @@ ppo:
   vf_coef: 0.5
 
 evaluation:
-  angles_deg: [5.0, 15.0, 18.0, 20.0, 40.0]
-  duree_s: 6.0
-  # Le notebook (CODE 2) évaluait sans critère d'arrêt.
-  arret_aux_limites: false
-  # Méthode d'origine : premier instant où |θ| < seuil (voir metriques.py)
+  # Protocole commun à tous les contrôleurs. Il est toujours lu dans ce fichier,
+  # même pour un modèle entraîné avec une version antérieure de config.yaml.
+  angles_deg: [5.0, 10.0, 15.0, 18.0, 20.0, 40.0, -5.0, -10.0, -15.0, -18.0, -20.0, -40.0]
+  duree_s: 10.0
+  # Critères d'arrêt (échec « limites dépassées ») : pendule tombé ou chariot hors rail
+  arret_aux_limites: true
+  theta_arret_deg: 90.0
+  x_arret: 4.0
+  # Temps d'établissement : premier instant à partir duquel |θ| reste <= seuil
+  # jusqu'à la fin de la simulation, ce maintien devant durer au moins maintien_min_s.
   seuil_stabilisation_deg: 0.5
+  maintien_min_s: 1.0
+  # Stabilisation complète (indicateur secondaire) : mêmes règles, avec en plus
+  # |x| <= x_tol, |ẋ| <= x_point_tol et |θ̇| <= theta_point_tol_deg.
+  x_tol: 0.1
+  x_point_tol: 0.1
+  theta_point_tol_deg: 5.0
+
+bassin:
+  # Grille d'états initiaux (x0 = ẋ0 = 0) pour la carte du bassin d'attraction
+  theta0_deg: {min: -25.0, max: 25.0, pas: 1.0}
+  theta_point0: {min: -1.5, max: 1.5, pas: 0.1}   # [rad/s]

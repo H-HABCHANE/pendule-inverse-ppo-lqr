@@ -38,6 +38,7 @@ class Simulation:
 class LQR:
     Q: tuple[float, ...]
     R: float
+    R_balayage: tuple[float, ...]
 
 
 @dataclass(frozen=True)
@@ -82,7 +83,30 @@ class Evaluation:
     angles_deg: tuple[float, ...]
     duree_s: float
     arret_aux_limites: bool
+    theta_arret_deg: float
+    x_arret: float
     seuil_stabilisation_deg: float
+    maintien_min_s: float
+    x_tol: float
+    x_point_tol: float
+    theta_point_tol_deg: float
+
+
+@dataclass(frozen=True)
+class Plage:
+    min: float
+    max: float
+    pas: float
+
+    def valeurs(self):
+        n = int(round((self.max - self.min) / self.pas)) + 1
+        return [self.min + k * self.pas for k in range(n)]
+
+
+@dataclass(frozen=True)
+class Bassin:
+    theta0_deg: Plage
+    theta_point0: Plage
 
 
 @dataclass(frozen=True)
@@ -93,6 +117,7 @@ class Config:
     environnement: Environnement
     ppo: PPO
     evaluation: Evaluation
+    bassin: Bassin
 
     @property
     def pas_par_episode(self) -> int:
@@ -122,8 +147,8 @@ def _construire(cls, donnees: dict, nom: str):
     valeurs = {}
     for cle, f in attendues.items():
         v = donnees[cle]
-        if f.name == "recompense":
-            v = _construire(Recompense, v, f"{nom}.recompense")
+        if isinstance(v, dict):  # sous-section : son type est donné par l'annotation
+            v = _construire(globals()[f.type], v, f"{nom}.{cle}")
         elif isinstance(v, list):
             v = tuple(float(x) for x in v)
         valeurs[cle] = v
@@ -145,7 +170,12 @@ SECTIONS = {
     "environnement": Environnement,
     "ppo": PPO,
     "evaluation": Evaluation,
+    "bassin": Bassin,
 }
+
+# Sections décrivant l'agent et son entraînement : pour un modèle, elles sont lues dans
+# la copie sauvegardée avec lui. Les autres décrivent le protocole d'évaluation.
+SECTIONS_ENTRAINEMENT = ("physique", "simulation", "environnement", "ppo")
 
 
 def depuis_dict(donnees: dict) -> Config:
@@ -156,6 +186,19 @@ def depuis_dict(donnees: dict) -> Config:
 
 def charger(chemin: str | Path = CONFIG_DEFAUT) -> Config:
     return depuis_dict(yaml.safe_load(Path(chemin).read_text()))
+
+
+def charger_modele(chemin: str | Path, protocole: Config) -> Config:
+    """Configuration d'un modèle : sections d'entraînement du modèle, protocole d'évaluation courant.
+
+    Ainsi un modèle est toujours simulé avec la physique et l'environnement sur lesquels
+    il a été entraîné, et évalué exactement comme les autres contrôleurs.
+    """
+    sauvegarde = yaml.safe_load(Path(chemin).read_text())
+    donnees = protocole.vers_dict()
+    for section in SECTIONS_ENTRAINEMENT:
+        donnees[section] = sauvegarde[section]
+    return depuis_dict(donnees)
 
 
 def verifier_compatibles(a: Config, b: Config) -> None:

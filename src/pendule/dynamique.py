@@ -59,3 +59,13 @@ def linearisation(p: Physique) -> tuple[np.ndarray, np.ndarray]:
     )
     B = np.array([[0.0], [1.0 / p.M], [0.0], [-1.0 / (p.M * p.l)]])
     return A, B
+
+
+def angle_limite_rattrapage(p: Physique, u_max: float) -> float:
+    """Angle θ* (rad) au-delà duquel un pendule lâché sans vitesse ne peut plus être rattrapé.
+
+    θ̈ = ((M + m) g sin θ − u cos θ) / (l (M + m sin² θ)). Pour |u| <= u_max, θ̈ > 0 dès que
+    tan θ > u_max / ((M + m) g) : l'ensemble {θ > θ*, θ̇ >= 0} est alors invariant, quel que
+    soit le contrôleur. Avec les valeurs du projet (4 N), θ* ≈ 20,34°.
+    """
+    return float(np.arctan(u_max / ((p.M + p.m) * p.g)))

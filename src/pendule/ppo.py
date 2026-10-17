@@ -12,7 +12,7 @@ from pathlib import Path
 
 import numpy as np
 
-from pendule.config import Config, charger
+from pendule.config import Config, charger, charger_modele
 
 
 def entrainer(cfg: Config, dossier: str | Path, verbose: int = 0) -> Path:
@@ -56,18 +56,23 @@ def entrainer(cfg: Config, dossier: str | Path, verbose: int = 0) -> Path:
 class ControleurPPO:
     nom = "PPO"
 
-    def __init__(self, modele):
+    def __init__(self, modele, nom: str = "PPO"):
         self.modele = modele
+        self.nom = nom
 
-    def __call__(self, s: np.ndarray) -> float:
-        action, _ = self.modele.predict(s, deterministic=True)
-        return float(action[0])
+    def __call__(self, s: np.ndarray):
+        """Force en N. ``s`` : un état (4,) ou un lot d'états (N, 4)."""
+        action, _ = self.modele.predict(np.asarray(s, dtype=np.float32), deterministic=True)
+        return action[..., 0].astype(np.float64)
 
 
-def charger_agent(dossier: str | Path) -> tuple[ControleurPPO, Config]:
-    """Charge un modèle avec la configuration exacte utilisée pour l'entraîner."""
+def charger_agent(dossier: str | Path, protocole: Config | None = None) -> tuple[ControleurPPO, Config]:
+    """Charge un modèle avec la physique et l'environnement utilisés pour l'entraîner.
+
+    Le protocole d'évaluation vient de ``protocole`` (par défaut config.yaml).
+    """
     from stable_baselines3 import PPO
 
     dossier = Path(dossier)
-    cfg = charger(dossier / "config.yaml")
+    cfg = charger_modele(dossier / "config.yaml", protocole or charger())
     return ControleurPPO(PPO.load(dossier / "model.zip", device="cpu")), cfg

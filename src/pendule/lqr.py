@@ -26,9 +26,10 @@ def gain_lqr(cfg: Config, R: float | None = None) -> np.ndarray:
 class ControleurLQR:
     nom = "LQR"
 
-    def __init__(self, cfg: Config, R: float | None = None):
+    def __init__(self, cfg: Config, R: float | None = None, nom: str = "LQR"):
         self.K = gain_lqr(cfg, R)
+        self.nom = nom
 
-    def __call__(self, s: np.ndarray) -> float:
-        """Force demandée en N, avant saturation."""
-        return float(-self.K @ np.asarray(s, dtype=np.float64))
+    def __call__(self, s: np.ndarray):
+        """Force demandée en N, avant saturation. ``s`` : un état (4,) ou un lot d'états (N, 4)."""
+        return -np.asarray(s, dtype=np.float64) @ self.K
