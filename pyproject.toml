@@ -1,0 +1,25 @@
+# Sert uniquement à rendre le package src/pendule importable (pip install -e .)
+# depuis les scripts, les tests et le notebook. Les versions exactes sont dans
+# requirements.txt.
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "pendule"
+version = "0.1.0"
+requires-python = ">=3.10"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+
+[tool.ruff]
+line-length = 120
+extend-exclude = ["archive"]  # notebook original, conservé tel quel
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "B", "UP"]
+ignore = ["E741"]  # « l » désigne la longueur du pendule, comme dans les équations

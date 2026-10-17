@@ -1,0 +1,17 @@
+# Versions utilisées pour les résultats du dépôt (Python 3.14, CPU).
+# PyTorch CPU seul (plus léger) :
+#   pip install torch==2.14.1 --index-url https://download.pytorch.org/whl/cpu
+numpy==2.5.4
+scipy==1.18.1
+gymnasium==1.4.0
+stable-baselines3==2.9.0
+torch==2.14.1
+matplotlib==3.11.2
+pandas==3.0.6
+PyYAML==6.0.3
+
+# Tests, qualité, notebook
+pytest==9.1.1
+ruff==0.17.1
+nbconvert==7.17.2
+ipykernel==7.4.0
